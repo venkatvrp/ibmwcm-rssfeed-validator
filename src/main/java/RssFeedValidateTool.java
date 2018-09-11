@@ -4,11 +4,13 @@ import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jdom.Element;
@@ -22,20 +24,23 @@ import com.sun.syndication.io.SyndFeedInput;
 import com.sun.syndication.io.XmlReader;
 
 public class RssFeedValidateTool {
-	
+
 	final static Logger logger = LogManager.getLogger(RssFeedValidateTool.class);
+	final static ResourceBundle resourceBundle = ResourceBundle.getBundle("rssfeedvalidator");
 
 	public static void main(String[] args) {
-		RssFeedValidateTool rssFeedValidator = new RssFeedValidateTool();		
-		if(args!=null && args[0].length()>0) {
+		RssFeedValidateTool rssFeedValidator = new RssFeedValidateTool();
+		if (args != null && args[0].length() > 0) {
 			String rssFeedUrl = args[0];
 			logger.debug("Feed validation inprogress...");
-			if(rssFeedValidator.validateXML(rssFeedUrl) && rssFeedValidator.validateImageURL(rssFeedUrl)) {
+			if (rssFeedValidator.validateXML(rssFeedUrl) &&
+					rssFeedValidator.validateXMLElements(rssFeedUrl) && 
+					rssFeedValidator.validateImageURL(rssFeedUrl)) {
 				logger.debug("Feed validated successfully !!");
-			}else {
+			} else {
 				logger.debug("Feed validaiton failed");
 			}
-		}else {
+		} else {
 			logger.debug("Please specify the RSS Feed URL");
 		}
 	}
@@ -65,10 +70,10 @@ public class RssFeedValidateTool {
 								con.setRequestMethod("GET");
 								int responseCode = con.getResponseCode();
 								imgTtlCnt++;
-								if(responseCode == 404) {
+								if (responseCode == 404) {
 									logger.debug(entry.getTitle() + " content url invalid:: " + url);
 									imgFailCnt++;
-								}else {
+								} else {
 									imgPassCnt++;
 								}
 							}
@@ -76,11 +81,11 @@ public class RssFeedValidateTool {
 					}
 				}
 			}
-			logger.debug("***** Total number of image URL scanned :" +imgTtlCnt);
-			logger.debug("***** Image URL failed scan :" +imgFailCnt);
-			logger.debug("***** Image URL passed scan :" +imgPassCnt);
+			logger.debug("***** Total number of image URL scanned :" + imgTtlCnt + "******");
+			logger.debug("***** Image URL failed scan :" + imgFailCnt + "******");
+			logger.debug("***** Image URL passed scan :" + imgPassCnt + "******");
 		} catch (IllegalArgumentException | FeedException | IOException e) {
-			logger.error("Error occurred while validating image URL: "+ e.getMessage());
+			logger.error("Error occurred while validating image URL: " + e.getMessage());
 			return false;
 		}
 		return true;
@@ -88,21 +93,49 @@ public class RssFeedValidateTool {
 
 	private boolean validateXML(String rssFeedUrl) {
 		try {
-			
-            Reader reader = new InputStreamReader(new URL(rssFeedUrl).openStream(),"UTF-8");
-            InputSource xmlSource = new InputSource(reader);
-            xmlSource.setEncoding("UTF-8");                
 
-            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-		    DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-		    docBuilder.parse(xmlSource);
-		   
+			Reader reader = new InputStreamReader(new URL(rssFeedUrl).openStream(), "UTF-8");
+			InputSource xmlSource = new InputSource(reader);
+			xmlSource.setEncoding("UTF-8");
+
+			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+			docBuilder.parse(xmlSource);
+			logger.debug("***** XML validation success ******");
 		} catch (ParserConfigurationException | SAXException | IOException e) {
-			logger.error("Error occurred while validating XML: "+ e.getMessage());
+			logger.error("Error occurred while validating XML: " + e.getMessage());
 			return false;
 		}
 		return true;
 	}
+
+	private boolean validateXMLElements(String rssFeedUrl) {
+		String[] feedElmtArr = resourceBundle.getString("feed.element.entries").split(",");
+		URL feedUrl;
+		try {
+			if(feedElmtArr!=null && feedElmtArr.length >0) {
+				feedUrl = new URL(rssFeedUrl);
+				SyndFeedInput input = new SyndFeedInput();
+				SyndFeed feed = input.build(new XmlReader(feedUrl));
 	
-	
+				for (SyndEntry entry : (List<SyndEntry>) feed.getEntries()) {
+					List<Element> foreignElementList = (List<Element>) entry.getForeignMarkup();
+					for(Element element : foreignElementList) {
+						if(!ArrayUtils.contains(feedElmtArr, element.getQualifiedName())) {
+							return false;
+						}
+					}
+				}
+				logger.debug("***** XML Elements validation success ******");
+			}else{
+				logger.debug("There are no XML elements to validate against..");
+			}
+			
+		} catch (IllegalArgumentException | FeedException | IOException e) {
+			logger.error("Error occurred while validating the XML elements");
+			return false;
+		}
+		return true;
+	}
+
 }
