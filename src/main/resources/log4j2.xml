@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="DEBUG">
+    <Appenders>
+        <RollingFile name="rssfeed-validator-file" fileName="C:\\logs\\rssfeed-validator.log" filePattern="C:\\logs\\rssfeed-validator-%i.log" append="false">
+			 <Policies>				
+				<SizeBasedTriggeringPolicy size="5 KB"/>							
+			</Policies>
+			<DefaultRolloverStrategy max="100"/>
+			<PatternLayout pattern="[%d{dd/MM/yy hh:mm:ss:sss z}] %5p %c{2}:%L - %m%n"/>            
+        </RollingFile>       
+		<Async name="async">
+			<AppenderRef ref="rssfeed-validator-file"/>		
+        </Async>		
+    </Appenders>
+    <Loggers>
+        <Logger name="RssFeedValidateTool" level="debug">
+			<AppenderRef ref="rssfeed-validator-file"/>
+		</Logger>				
+        <Root level="info">            
+            <AppenderRef ref="async"/>
+        </Root>
+    </Loggers>
+</Configuration>

@@ -1,7 +1,6 @@
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.StringReader;
+import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
@@ -10,8 +9,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jdom.Element;
-import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -22,21 +22,21 @@ import com.sun.syndication.io.SyndFeedInput;
 import com.sun.syndication.io.XmlReader;
 
 public class RssFeedValidateTool {
+	
+	final static Logger logger = LogManager.getLogger(RssFeedValidateTool.class);
 
 	public static void main(String[] args) {
-		RssFeedValidateTool rssFeedValidator = new RssFeedValidateTool();
-		System.out.println("Please enter the target RSS Feed URL :");
+		RssFeedValidateTool rssFeedValidator = new RssFeedValidateTool();		
 		if(args!=null && args[0].length()>0) {
 			String rssFeedUrl = args[0];
-			System.out.println("Feed validation inprogress...");
-			//rssFeedValidator.validateXML(rssFeedUrl) &&
-			if(rssFeedValidator.validateImageURL(rssFeedUrl)) {
-				System.out.println("Feed validated successfully !!");
+			logger.debug("Feed validation inprogress...");
+			if(rssFeedValidator.validateXML(rssFeedUrl) && rssFeedValidator.validateImageURL(rssFeedUrl)) {
+				logger.debug("Feed validated successfully !!");
 			}else {
-				System.out.println("Feed validaiton failed");
+				logger.debug("Feed validaiton failed");
 			}
 		}else {
-			System.out.println("Please specify the RSS Feed URL");
+			logger.debug("Please specify the RSS Feed URL");
 		}
 	}
 
@@ -66,7 +66,7 @@ public class RssFeedValidateTool {
 								int responseCode = con.getResponseCode();
 								imgTtlCnt++;
 								if(responseCode == 404) {
-									System.out.println(entry.getTitle() + " content url invalid:: " + url);
+									logger.debug(entry.getTitle() + " content url invalid:: " + url);
 									imgFailCnt++;
 								}else {
 									imgPassCnt++;
@@ -76,11 +76,11 @@ public class RssFeedValidateTool {
 					}
 				}
 			}
-			System.out.println("***** Total number of image URL scanned :" +imgTtlCnt);
-			System.out.println("***** Image URL failed scan :" +imgFailCnt);
-			System.out.println("***** Image URL passed scan :" +imgPassCnt);
+			logger.debug("***** Total number of image URL scanned :" +imgTtlCnt);
+			logger.debug("***** Image URL failed scan :" +imgFailCnt);
+			logger.debug("***** Image URL passed scan :" +imgPassCnt);
 		} catch (IllegalArgumentException | FeedException | IOException e) {
-			System.out.println("Error occurred while validating image URL: "+ e.getMessage());
+			logger.error("Error occurred while validating image URL: "+ e.getMessage());
 			return false;
 		}
 		return true;
@@ -88,21 +88,21 @@ public class RssFeedValidateTool {
 
 	private boolean validateXML(String rssFeedUrl) {
 		try {
-			InputStreamReader isr = new InputStreamReader(new URL(rssFeedUrl).openStream(), "UTF-8");
-			BufferedReader in = new BufferedReader(isr);
-			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-			DocumentBuilder builder = factory.newDocumentBuilder();
+			
+            Reader reader = new InputStreamReader(new URL(rssFeedUrl).openStream(),"UTF-8");
+            InputSource xmlSource = new InputSource(reader);
+            xmlSource.setEncoding("UTF-8");                
 
-			String inputLine;
-			String wholeDocument = "";
-			while ((inputLine = in.readLine()) != null) {
-				// builder.parse(inputLine);
-				Document doc = builder.parse(new InputSource(new StringReader(inputLine)));
-			}
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+		    DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+		    docBuilder.parse(xmlSource);
+		   
 		} catch (ParserConfigurationException | SAXException | IOException e) {
-			System.out.println("Error occurred while validating XML: "+ e.getMessage());
+			logger.error("Error occurred while validating XML: "+ e.getMessage());
 			return false;
 		}
 		return true;
 	}
+	
+	
 }
