@@ -10,7 +10,7 @@
         </RollingFile>
     </Appenders>
     <Loggers>
-        <Logger name="rss.feed.validator" level="debug">
+        <Logger name="rss.feed.engine" level="debug">
 			<AppenderRef ref="rssfeed-validator-file"/>
 		</Logger>				
         <Root level="info">            

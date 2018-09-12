@@ -80,8 +80,8 @@ public class FeedValidatorEngine {
 				}
 			}
 			logger.debug("Total number of image URL scanned :" + imgTtlCnt);
-			logger.debug("Image URL failed scan :" + imgFailCnt);
-			logger.debug("Image URL passed scan :" + imgPassCnt);
+			logger.debug("Number of image URLs failed :" + imgFailCnt);
+			logger.debug("Number of image URLs passed :" + imgPassCnt);
 		} catch (IllegalArgumentException | FeedException | IOException e) {
 			logger.error("Error occurred while validating image URL: " + e.getMessage());
 			return false;
