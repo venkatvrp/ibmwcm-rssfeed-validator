@@ -1,4 +1,4 @@
-package rss.feed.validator;
+package rss.feed.engine;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -27,13 +27,13 @@ import com.sun.syndication.io.XmlReader;
 
 import rss.feed.model.CountStat;
 
-public class RssFeedValidateTool {
+public class FeedValidatorEngine {
 	
 	static final ResourceBundle resourceBundle = ResourceBundle.getBundle("rssfeedvalidator");
-	static final Logger logger = LogManager.getLogger(RssFeedValidateTool.class);
+	static final Logger logger = LogManager.getLogger(FeedValidatorEngine.class);
 
 	public static void main(String[] args) {
-		RssFeedValidateTool rssFeedValidator = new RssFeedValidateTool();
+		FeedValidatorEngine rssFeedValidator = new FeedValidatorEngine();
 		if (args != null && args[0].length() > 0) {
 			String rssFeedUrl = args[0];
 			logger.debug("Feed validation inprogress...");

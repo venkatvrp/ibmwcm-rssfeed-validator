@@ -58,7 +58,7 @@
 						<configuration>
 							<archive>
 								<manifest>
-									<mainClass>rss.feed.validator.RssFeedValidateTool</mainClass>
+									<mainClass>rss.feed.engine.FeedValidatorEngine</mainClass>
 								</manifest>
 							</archive>
 							<descriptorRefs>
