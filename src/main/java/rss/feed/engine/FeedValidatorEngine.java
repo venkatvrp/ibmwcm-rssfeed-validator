@@ -1,7 +1,11 @@
 package rss.feed.engine;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -66,6 +70,7 @@ public class FeedValidatorEngine {
 			SyndFeed feed = input.build(new XmlReader(feedUrl));
 
 			for (SyndEntry entry : (List<SyndEntry>) feed.getEntries()) {
+				
 				List<Element> foreignElementList = (List<Element>) entry.getForeignMarkup();
 				for (Element element : foreignElementList) {
 					if (element.getAttributeValue("name") != null
@@ -111,6 +116,7 @@ public class FeedValidatorEngine {
 					int imgTtlCnt = countStat.getImgTtlCnt();
 					imgTtlCnt ++;
 					countStat.setImgTtlCnt(imgTtlCnt);
+					
 					if (responseCode == 404) {
 						logger.debug(entry.getTitle() + " content url invalid:: " + url);
 						int imgFailCnt = countStat.getImgFailCnt();
@@ -119,6 +125,9 @@ public class FeedValidatorEngine {
 					} else {
 						int imgPassCnt = countStat.getImgPassCnt();
 						imgPassCnt++;
+						if(Boolean.parseBoolean(resourceBundle.getString("download.image"))){
+							saveImage(url);
+						}						
 						countStat.setImgPassCnt(imgPassCnt);					
 					}
 				}
@@ -184,5 +193,64 @@ public class FeedValidatorEngine {
 		}
 		return true;
 	}
+	
+	/**
+	 * Saves the image to the local folder
+	 * @param imageUrl
+	 * @throws IOException
+	 */
+	private static void saveImage(String imageUrl) throws IOException {
+		
+		try {
+		URL url = new URL(imageUrl);
+		
+		String fileName = url.getFile();
+		String destName = resourceBundle.getString("image.base.path") + fileName;
+		logger.debug(destName);
+		
+		File f = new File(destName);
+		logger.debug(f.getName());
+		
+		String dirName = destName.substring(0, destName.indexOf(f.getName()));
+		
+		logger.debug("dirName" +dirName);
+		File theDir = new File(destName);
+
+		// if the directory does not exist, create it
+		if (!theDir.exists()) {
+		    logger.debug("creating directory: " + theDir.getAbsolutePath());
+		    boolean result = false;
+
+		    try{
+		        theDir.mkdirs();
+		        result = true;
+		    } 
+		    catch(SecurityException se){
+		        //handle it
+		    	se.printStackTrace();
+		    }        
+		    if(result) {    
+		        logger.debug("DIR created");  
+		    }
+		}
+		 
+		InputStream is = url.openStream();
+		OutputStream os = new FileOutputStream(destName);
+	 
+		byte[] b = new byte[2048];
+		int length;
+	 
+		while ((length = is.read(b)) != -1) {
+			os.write(b, 0, length);
+		}
+	 
+		is.close();
+		os.close();
+		}catch(Exception e) {
+			logger.error("Error while copying the images" + e.getMessage());
+		}
+	}
+	
+	
 
 }

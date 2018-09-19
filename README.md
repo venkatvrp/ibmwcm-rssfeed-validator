@@ -1,15 +1,16 @@
 # ibmwcm-rssfeed-validator
 IBM WCM RSS feed validator
 
-IBM WCM RSS feed validator tools helps to validate the RSS Feed xml format, image URLs, element names. This helps to minimize the failures and troubleshooting time when the feed is used on WCI. Tool can be either used as a standalone executable jar or it can also be imported to local eclipse IDE and executed from there.
+IBM WCM RSS feed validator tools helps to validate the RSS Feed xml format, image URLs, element names. This helps to minimize the failures and troubleshooting time when the feed is used on WCI. Tool can either be used as a standalone executable jar or imported to a local eclipse IDE.
 
 Features
 --------
 1. Checks whether the XML is well formatted.
 2. Validates the ibmwcm elements tags
-3. Verifies whether the image URLs used in the feed is correct
-4. Results are logged in an external log file for troubleshooting purposes.
-5. ibmwcm elements are configurable in the .properties file
+3. Verifies whether the image URLs used in the feed are correct
+4. Logs validation results in a log file for troubleshooting purposes.
+5. Additional ibmwcm elements are configurable in the .properties file
+6. Can download the images in to local folder
  
 
 Steps to use the tool

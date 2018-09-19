@@ -6,7 +6,7 @@
 				<SizeBasedTriggeringPolicy size="5 MB"/>							
 			</Policies>
 			<DefaultRolloverStrategy max="100"/>
-			<PatternLayout pattern="[%d{dd/MM/yy hh:mm:ss:sss z}] %5p %c{2}:%L - %m%n"/>            
+			<PatternLayout charset="UTF-8" pattern="[%d{dd/MM/yy hh:mm:ss:sss z}] %5p %c{2}:%L - %m%n"/>            
         </RollingFile>
     </Appenders>
     <Loggers>
