@@ -10,7 +10,8 @@ Features
 3. Verifies whether the image URLs used in the feed are correct
 4. Logs validation results in a log file for troubleshooting purposes.
 5. Additional ibmwcm elements are configurable in the .properties file
-6. Can download the images in to local folder
+6. Downloads the images from the RSS feed in to local folder
+7. Validates the final migrated article http URLs
  
 
 Steps to use the tool

@@ -68,11 +68,12 @@ public class FeedValidatorEngine {
 			feedUrl = new URL(rssFeedUrl);
 			SyndFeedInput input = new SyndFeedInput();
 			SyndFeed feed = input.build(new XmlReader(feedUrl));
-
+			String staticUrl = resourceBundle.getString("server.static.url");
 			for (SyndEntry entry : (List<SyndEntry>) feed.getEntries()) {
 				
 				List<Element> foreignElementList = (List<Element>) entry.getForeignMarkup();
-				for (Element element : foreignElementList) {
+				String path = "";
+				for (Element element : foreignElementList) {					
 					if (element.getAttributeValue("name") != null
 							&& (element.getAttributeValue("name").startsWith("article-image") ||
 									element.getAttributeValue("name").equals("regular-article-thumbnail-image") || 
@@ -81,8 +82,20 @@ public class FeedValidatorEngine {
 						imgTtlCnt = imgTtlCnt + countStat.getImgTtlCnt();
 						imgFailCnt = imgFailCnt + countStat.getImgFailCnt();
 						imgPassCnt = imgPassCnt + countStat.getImgPassCnt();
-					}
+					}					
+					if (element.getName().equals("path") && element.getValue().length()>0){
+						path = element.getValue();						
+						path = path.substring(9, path.length());						
+					}				
 				}
+				if(Boolean.parseBoolean(resourceBundle.getString("validate.url.onserver"))){
+					String finalUrl = staticUrl+ path + "/"+entry.getTitle();
+					if(getURLResponseCode(finalUrl)!=200) {
+						logger.debug(finalUrl + " XXXX VALIDATION FAILED XXXXX");
+					}else {
+						logger.debug(finalUrl);
+					}
+				}				
 			}
 			logger.debug("Total number of image URL scanned :" + imgTtlCnt);
 			logger.debug("Number of image URLs failed :" + imgFailCnt);
@@ -108,11 +121,8 @@ public class FeedValidatorEngine {
 			if (childElem != null && childElem.getContentSize() > 0
 					&& !childElem.getText().equals("image")) {
 				String url = childElem.getContent(0).getValue();								
-				if(url!=null && !url.isEmpty()) {
-					URL obj = new URL(url);
-					HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-					con.setRequestMethod("GET");
-					int responseCode = con.getResponseCode();
+				if(url!=null && !url.isEmpty()) {					
+					int responseCode = getURLResponseCode(url);
 					int imgTtlCnt = countStat.getImgTtlCnt();
 					imgTtlCnt ++;
 					countStat.setImgTtlCnt(imgTtlCnt);
@@ -135,6 +145,19 @@ public class FeedValidatorEngine {
 		}
 		return countStat;
 	}
+	
+	private static int getURLResponseCode(String url) throws IOException{
+		if(url!=null && !url.isEmpty()) {
+			URL obj = new URL(url);
+			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+			con.setRequestMethod("GET");
+			int responseCode = con.getResponseCode();
+			return responseCode;
+		}else {
+			return 404;
+		}
+	}
+	
 
 	/**
 	 * Parses the XML and checks for the validity
@@ -252,5 +275,6 @@ public class FeedValidatorEngine {
 	}
 	
 	
-
+	
+	
 }
